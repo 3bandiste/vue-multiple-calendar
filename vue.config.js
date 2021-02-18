@@ -14,10 +14,9 @@ module.exports = {
         '@': path.resolve('src')
       }
     },
-    /*externals: {
-      vue: 'Vue',
-      moment: 'moment'
-    }*/
+    externals: {
+      vue: 'Vue'
+    }
   },
   lintOnSave: false
 }
