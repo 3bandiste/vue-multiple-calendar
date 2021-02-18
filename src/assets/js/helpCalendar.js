@@ -19,15 +19,14 @@ export default class helpCalendar {
     this.dateFormat = dateFormat
     this.dayNames = dayNames
   }
-
   formatDate(date) {
     let day = date.getDate()
     let month = date.getMonth() + 1
     let year = date.getFullYear()
 
-    let formattedDate = this.dateFormat.replace('dd', day.toString())
-    formattedDate = formattedDate.replace('mm', month.toString())
-    formattedDate = formattedDate.replace('yyyy', year.toString())
+    let formattedDate = this.dateFormat.replace('DD', day.toString())
+    formattedDate = formattedDate.replace('MM', month.toString())
+    formattedDate = formattedDate.replace('YYYY', year.toString())
     return formattedDate.split(' ')[0]
   }
 
@@ -47,9 +46,9 @@ export default class helpCalendar {
       throw new Error('Your date format not valid. Please read documentation.!')
     }
 
-    let year = format.indexOf('yyyy')
-    let month = format.indexOf('mm')
-    let day = format.indexOf('dd')
+    let year = format.indexOf('YYYY')
+    let month = format.indexOf('MM')
+    let day = format.indexOf('DD')
     return new Date(date[year], date[month] - 1, date[day])
   }
 
@@ -164,7 +163,8 @@ export default class helpCalendar {
           month: monthWeeks.month,
           year: monthWeeks.year,
           hide: false,
-          hideLeftAndRightDays: false
+          hideLeftAndRightDays: false,
+          markedDateData: {}
         })
       }
     })
@@ -234,9 +234,9 @@ export default class helpCalendar {
     }
 
     let mask = this.dateFormat
-      .replace('dd', dayMask)
-      .replace('mm', monthMask)
-      .replace('yyyy', '0000')
+      .replace('DD', dayMask)
+      .replace('MM', monthMask)
+      .replace('YYYY', '0000')
     // eslint-disable-next-line
     let literalPattern = /[0\*]/
     let numberPattern = /[0-9]/

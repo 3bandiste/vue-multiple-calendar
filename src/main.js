@@ -1,9 +1,8 @@
 import Vue from 'vue'
 import FunctionalCalendar from '../index'
-import Demo from './Demo'
+import Demo from './DemoRol'
 Vue.use(FunctionalCalendar, {
-  showWeekNumbers: false,
-  dayNames: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
+  showWeekNumbers: false
 })
 Vue.config.productionTip = false
 

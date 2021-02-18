@@ -29,7 +29,9 @@
           ></functional-calendar>
         </td>
         <td>
-          <functional-calendar></functional-calendar>
+          <functional-calendar date-format="yyyy-mm-dd" :is-multiple="true"
+                               :is-multiple-date-picker="true"
+                               :calendars-count="2"></functional-calendar>
         </td>
         <td>
           <functional-calendar :is-dark="true"></functional-calendar>

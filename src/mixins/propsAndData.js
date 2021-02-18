@@ -1,7 +1,14 @@
 const undefinedGenerator = () => undefined
-
+import moment from 'moment'
 export const propsAndData = {
   props: {
+    locale: {
+      default: 'en'
+    },
+    clickAndSwipeSelection: {
+      type: Boolean,
+      default: false
+    },
     borderColor: {
       type: String,
       default: ''
@@ -32,6 +39,10 @@ export const propsAndData = {
         const validFormats = ['HH:MM', 'HH:mm', 'hh:MM', 'hh:mm']
         return !!~validFormats.indexOf(timeFormat)
       }
+    },
+    displayFormat: {
+      type: String,
+      default: 'lll'
     },
     canClearRange: {
       type: Boolean,
@@ -89,7 +100,7 @@ export const propsAndData = {
       default: () => 3
     },
     newCurrentDate: {
-      type: Date
+      type: [Date, String]
     },
     markedDates: {
       type: Array,
@@ -98,8 +109,16 @@ export const propsAndData = {
     markedDateRange: {
       type: [Object, Array]
     },
+    // @deprecated use disabledDays instead
     disabledDayNames: {
       type: Array
+    },
+    disabledDays: {
+      type: Array
+    },
+    disableWeekends: {
+      type: Boolean,
+      default: false
     },
     disabledDates: {
       type: Array
@@ -118,15 +137,6 @@ export const propsAndData = {
     maxSelDays: {
       type: [Number, Boolean],
       default: undefinedGenerator
-    },
-    dayNames: {
-      type: Array
-    },
-    monthNames: {
-      type: Array
-    },
-    shortMonthNames: {
-      type: Array
     },
     showWeekNumbers: {
       type: Boolean,
@@ -163,8 +173,18 @@ export const propsAndData = {
       default: 'space-between'
     }
   },
+  created() {
+    moment.locale(this.locale)
+    this.fConfigs.dayNames= moment.weekdaysMin()
+    this.fConfigs.monthNames= moment.months()
+    this.fConfigs.shortMonthNames= moment.monthsShort()
+  },
   data() {
     return {
+      isMousedownSelectionActive: false,
+      temporarySelectedDates: [],
+      mousedownSelectionAction: 'SELECT',
+      mousedownSelectionStartDate: null,
       popoverElement: '',
       defaultDateFormat: {
         date: false,
@@ -198,7 +218,8 @@ export const propsAndData = {
       fConfigs: {
         sundayStart: false,
         placeholder: false,
-        dateFormat: 'dd/mm/yyyy hh:MM',
+        dateFormat: 'YYYY-MM-DDTHH:mm:ss[Z]',
+        displayFormat: 'lll',
         isMultipleDateRange: false,
         isDatePicker: false,
         isMultipleDatePicker: false,
@@ -228,36 +249,11 @@ export const propsAndData = {
         disabledDates: [],
         enabledDates: [],
         disabledDayNames: [],
+        disabledDays: [],
 
-        dayNames: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
-        monthNames: [
-          'January',
-          'February',
-          'March',
-          'April',
-          'May',
-          'June',
-          'July',
-          'August',
-          'September',
-          'October',
-          'November',
-          'December'
-        ],
-        shortMonthNames: [
-          'Jan',
-          'Feb',
-          'Mar',
-          'Apr',
-          'May',
-          'Jun',
-          'Jul',
-          'Aug',
-          'Sep',
-          'Oct',
-          'Nov',
-          'Dec'
-        ],
+        dayNames: moment.weekdaysMin(),
+        monthNames: moment.months(),
+        shortMonthNames: moment.monthsShort(),
 
         showWeekNumbers: false,
         transition: true,

@@ -2,6 +2,7 @@
 
 .vfc {
   &-popover-container {
+    position: relative;
     &:focus {
       outline: none;
     }
@@ -156,6 +157,7 @@
     &.vfc-modal {
       position: absolute;
       width: inherit;
+      min-width: 300px;
       z-index: 1000;
     }
 

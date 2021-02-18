@@ -22,7 +22,7 @@
           <template v-else-if="$parent.fConfigs.isMultipleDatePicker">{{
             getCurrentDateTime
           }}</template>
-          <template v-else>{{ $parent.calendar.selectedDateTime }}</template>
+          <template v-else>{{ $parent.calendar.selectedDate }}</template>
         </span>
       </div>
       <div class="titles">
@@ -41,7 +41,7 @@
             }"
             v-for="i in 24"
             :key="i"
-            @click="changeHour(formatTime(i))"
+            @click="changeHour(i-1)"
           >
             {{ formatTime(i) }}
           </div>
@@ -57,7 +57,7 @@
             }"
             v-for="i in 60"
             :key="i"
-            @click="changeMinute(formatTime(i))"
+            @click="changeMinute(i-1)"
           >
             {{ formatTime(i) }}
           </div>
@@ -83,7 +83,7 @@ export default {
     }
   },
   watch: {
-    startDateActive: function() {
+    startDateActive() {
       this.setScrollPosition()
     }
   },
@@ -100,18 +100,13 @@ export default {
     this.currentSelectedDate = selectedDates[selectedDates.length - 1]
   },
   mounted() {
-    let startDate = this.$parent.calendar.dateRange.start.split(' ')[0]
-    let endDate = this.$parent.calendar.dateRange.end.split(' ')[0]
-    if (
-      startDate &&
-      this.$parent.helpCalendar.getDateFromFormat(startDate) <
-        this.$parent.helpCalendar.getDateFromFormat(endDate)
-    ) {
-      this.startDateActive = false
-    } else {
-      this.startDateActive = true
+    if (this.$parent.calendar.dateRange) {
+      let startDate = this.$parent.calendar.dateRange.start.split(' ')[0]
+      let endDate = this.$parent.calendar.dateRange.end.split(' ')[0]
+      this.startDateActive = !(startDate &&
+          this.$parent.helpCalendar.getDateFromFormat(startDate) <
+          this.$parent.helpCalendar.getDateFromFormat(endDate));
     }
-
     this.setSelectedDateTime()
     this.setStyles()
   },
@@ -135,6 +130,7 @@ export default {
       return res
     },
     changeHour(hour) {
+      this.$emit('update:hour', hour)
       if (this.$parent.fConfigs.isDateRange) {
         if (this.checkStartDate()) {
           this.$parent.calendar.dateRange.start = this.addMinuteHour(
@@ -162,6 +158,7 @@ export default {
       this.setScrollPosition()
     },
     changeMinute(minute) {
+      this.$emit('update:minute', minute)
       if (this.$parent.fConfigs.isDateRange) {
         if (this.checkStartDate()) {
           this.$parent.calendar.dateRange.start = this.addMinuteHour(

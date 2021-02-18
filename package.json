@@ -1,12 +1,12 @@
 {
   "author": {
-    "name": "Manuk Minasyan",
-    "email": "manuk.minasyan1@gmail.com",
-    "url": "https://github.com/ManukMinasyan"
+    "name": "Eric Tromas",
+    "email": "eric.tromas@gmail.com",
+    "url": "https://github.com/3Bandiste"
   },
-  "name": "vue-functional-calendar",
-  "description": "Lightweight, high-performance calendar component based on Vue.js",
-  "version": "2.9.1",
+  "name": "vue-swipe-calendar",
+  "description": "Calendar component based on Vue.js",
+  "version": "0.0.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -54,6 +54,10 @@
   },
   "dependencies": {
     "core-js": "^2.6.5",
+    "moment": "^2.29.1",
+    "moment-range": "^4.0.2",
+    "moment-timezone": "^0.5.33",
+    "v-tooltip": "^2.1.2",
     "vue": "^2.5.21"
   },
   "devDependencies": {

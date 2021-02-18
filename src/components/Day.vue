@@ -1,12 +1,15 @@
 <template>
-  <div class="vfc-day">
+  <div class="vfc-day" @mousedown="$emit('mousedown', day)" @mouseup="$emit('mouseup')">
     <div v-if="startActive" class="vfc-base-start"></div>
     <div v-if="endActive" class="vfc-base-end"></div>
     <span
       v-if="!day.hideLeftAndRightDays"
       :class="getClassNames(day)"
-      @click.self="$parent.$parent.clickDay(day, isDisabledDate)"
+      @click.self="$parent.$parent.clickDay(day)"
       @mouseover="dayMouseOver"
+      v-tooltip="{
+        content: markedDateTooltip
+      }"
     >
       <slot :week="week" :day="day">{{ day.day }}</slot>
       <span v-if="timesShow" @click="clearRange" class="times">&times;</span>
@@ -25,8 +28,14 @@
 </template>
 
 <script>
+import dates from "../mixins/dates";
+import moment from "moment"
+import { VTooltip } from 'v-tooltip'
 export default {
   name: 'Day',
+  directives: {
+    tooltip: VTooltip
+  },
   props: {
     day_key: {
       type: Number,
@@ -57,9 +66,9 @@ export default {
     return {
       toolTip: false,
       onNumber: false
-      // toolTipTxt
     }
   },
+  mixins: [dates],
   computed: {
     startActive() {
       if (!this.fConfigs.isMultipleDateRange)
@@ -186,6 +195,14 @@ export default {
       }
 
       return (endPosFirst > -1 ? Number(endPosFirst) : 0) || startPosFirst
+    },
+    markedDateTooltip() {
+      try {
+        return this.day.markedDateData.tooltip
+      } catch (e) {
+        console.log('markedDateData: ', this.day.markedDateData)
+        return null
+      }
     }
   },
   methods: {
@@ -236,37 +253,12 @@ export default {
       this.calendar.multipleDateRange.splice(removeIndex, 1)
     },
     dayMouseOver() {
-      this.$emit('dayMouseOver', this.day.date)
+      this.$emit('dayMouseOver', this.day)
     },
     hasSlot(name = 'default') {
       return (
         !!this.$parent.$parent.$slots[name] ||
         !!this.$parent.$parent.$scopedSlots[name]
-      )
-    },
-    isDisabledDate(date) {
-      const datesCollection = this.fConfigs.disabledDates;
-
-      return !this.isEnabledDate(date) ||
-        this.isDateIncludedInDatesCollection(date, datesCollection);
-    },
-    isEnabledDate(date) {
-      const datesCollection = this.fConfigs.enabledDates;
-
-      return datesCollection.length === 0 ||
-        this.isDateIncludedInDatesCollection(date, datesCollection);
-    },
-    isDateIncludedInDatesCollection(date, datesCollection) {
-      let today = new Date()
-      today.setHours(0, 0, 0, 0)
-      let dateObj = this.helpCalendar.getDateFromFormat(date)
-
-      return (
-        datesCollection.includes(date) ||
-        (datesCollection.includes('beforeToday') &&
-          dateObj.getTime() < today.getTime()) ||
-        (datesCollection.includes('afterToday') &&
-          dateObj.getTime() > today.getTime())
       )
     },
     getClassNames(day) {
@@ -275,21 +267,15 @@ export default {
       if (!this.hasSlot('default')) {
         classes.push('vfc-span-day')
       }
-
+      let date = this.helpCalendar.getDateFromFormat(day.date)
       // Disable days of week if set in configuration
-      let dateDay = this.helpCalendar.getDateFromFormat(day.date).getDay() - 1
-      if (dateDay === -1) {
-        dateDay = 6
-      }
-      let dayOfWeekString = this.fConfigs.dayNames[dateDay]
-      if (this.fConfigs.disabledDayNames.includes(dayOfWeekString)) {
+      let dateDay = date.getDay()
+      const isDayDisabled = this.fConfigs.disabledDays.includes(dateDay)
+      if (isDayDisabled) {
         day.hide = true
         classes.push('vfc-cursor-not-allowed')
+        classes.push('vfc-hide')
       }
-
-      let date = this.helpCalendar.getDateFromFormat(day.date)
-      let today = new Date()
-      today.setHours(0, 0, 0, 0)
       // Disabled dates
       if (this.isDisabledDate(day.date)) {
         classes.push('vfc-disabled')
@@ -297,30 +283,34 @@ export default {
       }
 
       if (this.fConfigs.limits) {
-        let min = this.helpCalendar
-          .getDateFromFormat(this.fConfigs.limits.min)
-          .getTime()
-        let max = this.helpCalendar
-          .getDateFromFormat(this.fConfigs.limits.max)
-          .getTime()
+        let disabled = false
+        if (this.fConfigs.limits.min) {
+          let min = moment(this.fConfigs.limits.min, this.helpCalendar.dateFormat)
+          if (min.isValid() && day.moment.isBefore(min, 'day')) disabled = true
+        }
+        if (this.fConfigs.limits.max) {
+          if (this.fConfigs.limits.max) {
+            let max = moment(this.fConfigs.limits.max, this.helpCalendar.dateFormat)
+            if (max.isValid() && day.moment.isAfter(max, 'day')) disabled = true
+          }
+        }
 
-        if (date.getTime() < min || date.getTime() > max) {
+        if (disabled) {
           classes.push('vfc-disabled')
           classes.push('vfc-cursor-not-allowed')
         }
-      }
-
-      if (day.hide) {
-        classes.push('vfc-hide')
       }
 
       // Today date
       if (day.isToday) {
         classes.push('vfc-today')
       }
+      if (day.markedDateData.class) {
+        classes.push(day.markedDateData.class)
+      }
       if (
         !day.hideLeftAndRightDays &&
-        !this.fConfigs.disabledDayNames.includes(dayOfWeekString)
+        !isDayDisabled
       ) {
         // Mark Date
         if (day.isMarked) {
@@ -396,7 +386,6 @@ export default {
       //Date Multiple Range
       if (this.fConfigs.isMultipleDateRange) {
         if (!''.inRange) this.inRangeInit()
-        // console.log(day.date.inRange(this.calendar.multipleDateRange))
         if (
           day.isMarked ||
           ~this.calendar.multipleDateRange
@@ -439,27 +428,28 @@ export default {
       // Date Mark With Custom Classes
       if (typeof this.fConfigs.markedDates === 'object') {
         let checkMarked = this.fConfigs.markedDates.find(markDate => {
-          return markDate.date === day.date
+          return day.moment.isSame(markDate, 'day')
         })
 
         if (typeof checkMarked !== 'undefined') {
           classes.push(checkMarked.class)
         }
       }
+      if (this.calendar.dateRange) {
+        if (day.date === this.calendar.dateRange.start.split(' ')[0]) {
+          classes.push('vfc-start-marked')
+        }
 
-      if (day.date === this.calendar.dateRange.start.split(' ')[0]) {
-        classes.push('vfc-start-marked')
-      }
-
-      if (day.date === this.calendar.dateRange.end.split(' ')[0]) {
-        classes.push('vfc-end-marked')
+        if (day.date === this.calendar.dateRange.end.split(' ')[0]) {
+          classes.push('vfc-end-marked')
+        }
       }
 
       if (
-        day.date === this.calendar.selectedDate ||
-        (this.calendar.hasOwnProperty('selectedDates') &&
-          this.calendar.selectedDates.find(sDate => sDate.date === day.date))
-      ) {
+        day.moment.isSame(this.calendar.selectedDate, 'day') ||
+        (Array.isArray(this.calendar.selectedDates) &&
+          this.calendar.selectedDates.find(sDate => day.moment.isSame(sDate, 'day'))
+      )) {
         classes.push('vfc-borderd')
       }
 
@@ -468,7 +458,9 @@ export default {
   }
 }
 </script>
-
+<style lang="scss">
+@import '../assets/scss/tooltip.scss';
+</style>
 <style scoped lang="scss">
 .vfc-day {
   position: relative;

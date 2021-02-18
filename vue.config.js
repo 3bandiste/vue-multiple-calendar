@@ -13,7 +13,11 @@ module.exports = {
       alias: {
         '@': path.resolve('src')
       }
-    }
+    },
+    /*externals: {
+      vue: 'Vue',
+      moment: 'moment'
+    }*/
   },
-  lintOnSave: undefined
+  lintOnSave: false
 }
