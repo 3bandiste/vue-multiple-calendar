@@ -233,9 +233,10 @@ import MonthYearPicker from '../components/MonthYearPicker'
 import PickerInputs from '../components/PickerInputs'
 import Footer from '../components/Footer'
 import { hElContains, hUniqueID } from '../utils/helpers'
-import Moment from 'moment-timezone'
+import Moment from 'moment'
 import { extendMoment } from 'moment-range'
 const moment = extendMoment(Moment)
+import { DateTime } from 'luxon'
 
 export default {
   name: 'FunctionalCalendar',
@@ -428,10 +429,11 @@ export default {
   methods: {
     setHour(hour) {
       // Guessing the user zone and add the offset to convert it to UTC time
-      var zone = moment.tz.zone(moment.tz.guess());
-      const offset = zone.parse(Date.now())
+      //var zone = moment.tz.zone(moment.tz.guess());
+      //const offset = zone.parse(Date.now())
       if (this.isDatePicker && this.calendar.selectedDate) {
-        this.calendar.selectedDate = moment(this.calendar.selectedDate, this.dateFormat).hour(hour).add(offset, 'minutes').format(this.dateFormat)
+        const selectedDate = DateTime.fromISO(this.calendar.selectedDate).set({hour: hour})
+        this.calendar.selectedDate = selectedDate.toISO()
         this.$emit('input', this.calendar)
       }
     },
