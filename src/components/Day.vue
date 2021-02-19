@@ -29,7 +29,7 @@
 
 <script>
 import dates from "../mixins/dates";
-import moment from "moment"
+import {DateTime} from "luxon";
 import { VTooltip } from 'v-tooltip'
 export default {
   name: 'Day',
@@ -267,9 +267,8 @@ export default {
       if (!this.hasSlot('default')) {
         classes.push('vfc-span-day')
       }
-      let date = this.helpCalendar.getDateFromFormat(day.date)
       // Disable days of week if set in configuration
-      let dateDay = date.getDay()
+      let dateDay = day.dayOfWeek
       const isDayDisabled = this.fConfigs.disabledDays.includes(dateDay)
       if (isDayDisabled) {
         day.hide = true
@@ -285,13 +284,13 @@ export default {
       if (this.fConfigs.limits) {
         let disabled = false
         if (this.fConfigs.limits.min) {
-          let min = moment(this.fConfigs.limits.min, this.helpCalendar.dateFormat)
-          if (min.isValid() && day.moment.isBefore(min, 'day')) disabled = true
+          let limitMin = DateTime.fromISO(this.fConfigs.limits.min)
+          if (limitMin.isValid && day.moment.startOf('day') < limitMin.startOf( 'day')) disabled = true
         }
         if (this.fConfigs.limits.max) {
           if (this.fConfigs.limits.max) {
-            let max = moment(this.fConfigs.limits.max, this.helpCalendar.dateFormat)
-            if (max.isValid() && day.moment.isAfter(max, 'day')) disabled = true
+            let limitMax = DateTime.fromISO(this.fConfigs.limits.max)
+            if (limitMax.isValid && day.moment.startOf('day') > limitMax.startOf( 'day')) disabled = true
           }
         }
 
@@ -398,17 +397,11 @@ export default {
         ) {
           classes.push('vfc-marked')
         }
-        // } else if (day.isHovered) {
-        // classes.push('vfc-hovered')
-        // }
+
         if (this.fConfigs.markedDates.includes(day.date)) {
           classes.push('vfc-borderd')
         }
-        // console.log(
-        //   ~this.calendar.multipleDateRange
-        //     .map(range => range.start)
-        //     .indexOf(day.date)
-        // )
+
         if (
           ~this.calendar.multipleDateRange
             .map(range => range.start.split(' ')[0])
@@ -428,7 +421,7 @@ export default {
       // Date Mark With Custom Classes
       if (typeof this.fConfigs.markedDates === 'object') {
         let checkMarked = this.fConfigs.markedDates.find(markDate => {
-          return day.moment.isSame(markDate, 'day')
+          return day.moment.hasSame(DateTime.fromISO(markDate), 'day')
         })
 
         if (typeof checkMarked !== 'undefined') {
@@ -446,9 +439,9 @@ export default {
       }
 
       if (
-        day.moment.isSame(this.calendar.selectedDate, 'day') ||
+        day.moment.hasSame(DateTime.fromISO(this.calendar.selectedDate), 'day') ||
         (Array.isArray(this.calendar.selectedDates) &&
-          this.calendar.selectedDates.find(sDate => day.moment.isSame(sDate, 'day'))
+          this.calendar.selectedDates.find(sDate => day.moment.hasSame(DateTime.fromISO(sDate), 'day'))
       )) {
         classes.push('vfc-borderd')
       }

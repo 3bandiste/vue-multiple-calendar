@@ -233,10 +233,7 @@ import MonthYearPicker from '../components/MonthYearPicker'
 import PickerInputs from '../components/PickerInputs'
 import Footer from '../components/Footer'
 import { hElContains, hUniqueID } from '../utils/helpers'
-import Moment from 'moment'
-import { extendMoment } from 'moment-range'
-const moment = extendMoment(Moment)
-import { DateTime } from 'luxon'
+import {DateTime, Interval} from 'luxon'
 
 export default {
   name: 'FunctionalCalendar',
@@ -252,20 +249,18 @@ export default {
   mixins: [propsAndData, dates],
   computed: {
     dateRangeStartMoment() {
-      //start only with Day Month and Year
       if (!this.calendar.dateRange) return null
       if (this.calendar.dateRange.start) {
-        const start = moment(this.calendar.dateRange.start, this.dateFormat)
-        return start.isValid() ? start : null
+        const start = DateTime.fromISO(this.calendar.dateRange.start)
+        return start.isValid ? start : null
       }
       return null
     },
     dateRangeEndMoment() {
-      //end only with Day Month and Year
       if (!this.calendar.dateRange) return null
       if (this.calendar.dateRange.end) {
-        const end = moment(this.calendar.dateRange.end, this.dateFormat)
-        return end.isValid() ? end : null
+        const end = DateTime.fromISO(this.calendar.dateRange.end)
+        return end.isValid ? end : null
       }
       return null
     },
@@ -428,18 +423,16 @@ export default {
   },
   methods: {
     setHour(hour) {
-      // Guessing the user zone and add the offset to convert it to UTC time
-      //var zone = moment.tz.zone(moment.tz.guess());
-      //const offset = zone.parse(Date.now())
       if (this.isDatePicker && this.calendar.selectedDate) {
         const selectedDate = DateTime.fromISO(this.calendar.selectedDate).set({hour: hour})
         this.calendar.selectedDate = selectedDate.toISO()
         this.$emit('input', this.calendar)
       }
     },
-    setMinutes(minutes) {
+    setMinutes(minute) {
       if (this.isDatePicker && this.calendar.selectedDate) {
-        this.calendar.selectedDate = moment(this.calendar.selectedDate, this.dateFormat).minutes(minutes).format(this.dateFormat)
+        const selectedDate = DateTime.fromISO(this.calendar.selectedDate).set({minute: minute})
+        this.calendar.selectedDate = selectedDate.toISO()
         this.$emit('input', this.calendar)
       }
     },
@@ -553,15 +546,11 @@ export default {
         this.fConfigs.placeholder = this.fConfigs.dateFormat
 
       if (typeof this.newCurrentDate !== 'undefined') {
-        if (moment.isDate(this.newCurrentDate)) {
-          this.calendar.currentDate = this.newCurrentDate
-        } else {
-          this.calendar.currentDate = moment(this.newCurrentDate, this.dateFormat).toDate()
-        }
+        this.calendar.currentDate = DateTime.fromISO(this.newCurrentDate).toJSDate()
       }
 
       // Sunday Start
-      if (!this.fConfigs.sundayStart) {
+      if (this.fConfigs.sundayStart) {
         let dayNames = [...this.fConfigs.dayNames]
         let sundayName = dayNames[0]
         dayNames.splice(0, 1)
@@ -578,23 +567,23 @@ export default {
 
           week.days.forEach(day => {
             let date = new Date(day.year, day.month, day.day)
-            const momentDay = moment({year: day.year, month: day.month, day: day.day})
-            const isToday = momentDay.isSame(moment(), 'day')
+            const momentDay = DateTime.fromJSDate(date)
+            const isToday = momentDay.hasSame(DateTime.now(), 'day')
 
             let checkMarked
             // With Custom Classes
             if (typeof this.fConfigs.markedDates[0] === 'object') {
               checkMarked = this.fConfigs.markedDates.find(markDate => {
-                return markDate.date === momentDay.format(this.dateFormat)
+                return DateTime.fromISO(markDate.date).hasSame(momentDay, 'day')
               })
             } else {
               // Without Classes
               checkMarked = this.fConfigs.markedDates.find(markDate => {
-                return markDate === momentDay.format(this.dateFormat)
+                return DateTime.fromISO(markDate).hasSame(momentDay, 'day')
               })
             }
 
-            if (moment.isMoment(this.dateRangeStartMoment) && this.dateRangeStartMoment.isSame(momentDay, 'day')) {
+            if (this.dateRangeStartMoment && this.dateRangeStartMoment.hasSame(momentDay, 'day')) {
               checkMarked = true
             }
 
@@ -604,8 +593,8 @@ export default {
               day: day.day,
               date: this.helpCalendar.formatDate(date),
               moment: momentDay,
-              dateProperlyFormatted: momentDay.format(this.dateFormat),
-              dayOfWeek: parseInt(momentDay.format('d')),
+              dateProperlyFormatted: momentDay.toISODate(),
+              dayOfWeek: parseInt(momentDay.toFormat('c')),
               hide: day.hide,
               isMouseToLeft: false,
               isMouseToRight: false,
@@ -934,23 +923,23 @@ export default {
             if (this.temporarySelectedDates.includes(day.dateProperlyFormatted)) day.isMarked = true
             // Date Picker
             if (this.fConfigs.isDatePicker) {
-              if (this.calendar.selectedDate === day.dateProperlyFormatted) day.isMarked = true
+              if (DateTime.fromISO(this.calendar.selectedDate).hasSame(day.moment, 'day')) day.isMarked = true
             } else if (this.fConfigs.isMultipleDatePicker) {
               if (
                 Array.isArray(this.calendar.selectedDates) &&
-                this.calendar.selectedDates.includes(day.dateProperlyFormatted)
+                this.calendar.selectedDates.find(selectedDay => DateTime.fromISO(selectedDay).hasSame(day.moment, 'day'))
               )
                 day.isMarked = true
             } else {
               day.isMouseToLeft = false
               day.isMouseToRight = false
               // Date Range
-              if (moment.isMoment(this.dateRangeStartMoment) && this.dateRangeStartMoment.isSame(day.moment, 'day')) {
+              if (this.dateRangeStartMoment && this.dateRangeStartMoment.hasSame(day.moment, 'day')) {
                 day.isMouseToLeft = !!this.dateRangeEndMoment
                 day.isMarked = true
               }
 
-              if (moment.isMoment(this.dateRangeEndMoment) && this.dateRangeEndMoment.isSame(day.moment, 'day')) {
+              if (this.dateRangeEndMoment && this.dateRangeEndMoment.hasSame(day.moment, 'day')) {
                 day.isMouseToRight = !!this.dateRangeEndMoment
                 day.isMarked = true
               }
@@ -990,14 +979,12 @@ export default {
                 })
               }
 
-              if (moment.isMoment(this.dateRangeStartMoment) && this.dateRangeStartMoment.isSame(this.dateRangeEndMoment, 'day')) {
+              if (this.dateRangeStartMoment && this.dateRangeStartMoment.hasSame(this.dateRangeEndMoment, 'day')) {
                 day.isMouseToLeft = false
                 day.isMouseToRight = false
               }
               if (this.dateRangeStartMoment && this.dateRangeEndMoment) {
-                if (
-                  day.moment.isBetween(this.dateRangeStartMoment, this.dateRangeEndMoment, 'day', '[]')
-                ) {
+                if (this.dateRangeStartMoment <= day.moment && day.moment <= this.dateRangeEndMoment) {
                   day.isMarked = true
                 }
               }
@@ -1018,14 +1005,21 @@ export default {
       })
     },
     dayMouseOver(day) {
+      function* days(interval) {
+        let cursor = interval.start.startOf("day");
+        while (cursor < interval.end) {
+          yield cursor;
+          cursor = cursor.plus({ days: 1 });
+        }
+      }
       if (this.isMousedownSelectionActive) {
         // find days between selection start and hovered day
         const start = this.mousedownSelectionStartDate.moment
         const end   = day.moment;
-        const range = start.isBefore(end) ? moment.range(start, end) : moment.range(end, start);
-        this.temporarySelectedDates = Array.from(range.by('day'))
-            .filter(day => !this.fConfigs.disabledDays.includes(parseInt(day.format('d')))) // Check that day is not a disabled day
-            .map(day => day.format(this.dateFormat))
+        const range = start < end ? Interval.fromDateTimes(start, end) : Interval.fromDateTimes(end, start)
+        this.temporarySelectedDates = Array.from(days(range))
+            .filter(day => !this.fConfigs.disabledDays.includes(parseInt(day.toFormat('c')))) // Check that day is not a disabled day
+            .map(day => day.toISODate())
         this.markChooseDays()
       }
       if (!this.fConfigs.isDateRange) {
@@ -1034,10 +1028,10 @@ export default {
 
       // Limits
       if (this.fConfigs.limits) {
-        let limitMin = moment(this.fConfigs.limits.min, this.dateFormat)
-        let limitMax = moment(this.fConfigs.limits.max, this.dateFormat)
-        if (limitMin.isValid() && day.moment.isBefore(limitMin, 'day')) return false
-        if (limitMax.isValid() && day.moment.isAfter(limitMax, 'day')) return false
+        let limitMin = DateTime.fromISO(this.fConfigs.limits.min)
+        let limitMax = DateTime.fromISO(this.fConfigs.limits.max)
+        if (limitMin.isValid && day.moment.startOf('day') < limitMin.startOf( 'day')) return false
+        if (limitMax.isValid && day.moment.startOf('day') > limitMax.startOf( 'day')) return false
       }
       //Multiple Range
       if (
@@ -1347,13 +1341,13 @@ export default {
       if (this.fConfigs.limits) {
         let disabled = false
         if (this.fConfigs.limits.min) {
-          let min = moment(this.fConfigs.limits.min, this.dateFormat)
-          if (min.isValid() && day.moment.isBefore(min, 'day')) disabled = true
+          let min = DateTime.fromISO(this.fConfigs.limits.min)
+          if (min.isValid && day.moment.startOf('day') < min.startOf('day')) disabled = true
         }
         if (this.fConfigs.limits.max) {
           if (this.fConfigs.limits.max) {
-            let max = moment(this.fConfigs.limits.max, this.dateFormat)
-            if (max.isValid() && day.moment.isAfter(max, 'day')) disabled = true
+            let max = DateTime.fromISO(this.fConfigs.limits.max)
+            if (max.isValid && day.moment.startOf('day') > max.startOf('day')) disabled = true
           }
         }
 

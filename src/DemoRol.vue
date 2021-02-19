@@ -6,16 +6,16 @@
         :change-year-function="true"
         :changeYearStep="1"
         :is-multiple="false"
-        :is-date-picker="true"
-        :is-multiple-date-picker="false"
+        :is-date-picker="false"
+        :is-multiple-date-picker="true"
         with-time-picker
         :calendars-count="2"
         :is-modal="false"
         v-model="calendarData"
-        :click-and-swipe-selection="false"
-        date-format="YYYY-MM-DD"
+        :click-and-swipe-selection="true"
+        date-format="YYYY-MM-DDTHH:mm:ss[Z]"
         :disabled-days="disabledDays"
-        :limits="{min: '2021-02-11', max: '2022-01_01'}"
+        :limits="{min: '2021-02-11', max: '2022-01-01'}"
         :marked-dates="markedDates"
     ></functional-calendar>
   </div>
@@ -28,7 +28,7 @@ export default {
   components: { FunctionalCalendar },
   data() {
     return {
-      disabledDays: [0,6], // Sunday and saturday
+      disabledDays: [6,7], // Sunday and saturday
       rangesData: {
         multipleDateRange: [{ end: '17/7/2020', start: '3/7/2020' }]
       },

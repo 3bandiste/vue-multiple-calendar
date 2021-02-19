@@ -15,7 +15,7 @@ module.exports = {
       }
     },
     externals: {
-      vue: 'Vue'
+      //vue: 'Vue'
     }
   },
   lintOnSave: false
