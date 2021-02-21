@@ -235,6 +235,8 @@ import Footer from '../components/Footer'
 import { hElContains, hUniqueID } from '../utils/helpers'
 import {DateTime, Interval} from 'luxon'
 
+const weekEndDays = [6, 7] // Sunday and saturday
+
 export default {
   name: 'FunctionalCalendar',
   components: {
@@ -394,6 +396,14 @@ export default {
       },
       deep: true
     },
+    // disable weekends
+    disableWeekends (disable) {
+      if (disable) {
+        this.fConfigs.disabledDays = weekEndDays
+      } else {
+        this.fConfigs.disabledDays = this.disabledDays
+      }
+    },
     'configs.enabledDates': {
       handler() {
         this.fConfigs.enabledDates = this.configs.enabledDates;
@@ -535,7 +545,7 @@ export default {
       }
       // disable weekends
       if (this.disableWeekends) {
-        this.fConfigs.disabledDays = [0,6] // Sunday and saturday
+        this.fConfigs.disabledDays = weekEndDays // Sunday and saturday
       }
 
       // Is Modal

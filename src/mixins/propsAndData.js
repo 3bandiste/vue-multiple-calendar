@@ -1,5 +1,5 @@
 const undefinedGenerator = () => undefined
-import { Info } from 'luxon'
+import { Info, Settings } from 'luxon'
 export const propsAndData = {
   props: {
     locale: {
@@ -114,7 +114,10 @@ export const propsAndData = {
       type: Array
     },
     disabledDays: {
-      type: Array
+      type: Array,
+      default() {
+        return []
+      }
     },
     disableWeekends: {
       type: Boolean,
@@ -174,7 +177,7 @@ export const propsAndData = {
     }
   },
   created() {
-    //moment.locale(this.locale)
+    Settings.defaultLocale = this.locale;
     this.fConfigs.dayNames= Info.weekdays('short')
     this.fConfigs.monthNames= Info.months()
     this.fConfigs.shortMonthNames= Info.months("short")
