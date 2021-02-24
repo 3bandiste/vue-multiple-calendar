@@ -22,7 +22,7 @@
           <template v-else-if="$parent.fConfigs.isMultipleDatePicker">{{
             getCurrentDateTime
           }}</template>
-          <template v-else>{{ $parent.calendar.selectedDate }}</template>
+          <template v-else>{{ displayFormattedDateTime($parent.calendar.selectedDate) }}</template>
         </span>
       </div>
       <div class="titles">
@@ -68,6 +68,7 @@
 </template>
 
 <script>
+import {DateTime, Settings} from 'luxon'
 export default {
   name: 'TimePicker',
   data() {
@@ -77,6 +78,16 @@ export default {
     }
   },
   props: {
+    displayFormat: {
+      type: Object,
+      default() {
+        return DateTime.DATETIME_MED
+      }
+    },
+    locale: {
+      type: String,
+      default: 'en_US'
+    },
     height: {
       type: Number,
       required: true
@@ -100,6 +111,7 @@ export default {
     this.currentSelectedDate = selectedDates[selectedDates.length - 1]
   },
   mounted() {
+    Settings.defaultLocale = this.locale
     if (this.$parent.calendar.dateRange) {
       let startDate = this.$parent.calendar.dateRange.start.split(' ')[0]
       let endDate = this.$parent.calendar.dateRange.end.split(' ')[0]
@@ -111,6 +123,9 @@ export default {
     this.setStyles()
   },
   methods: {
+    displayFormattedDateTime(datetimeIsoString) {
+      return DateTime.fromISO(datetimeIsoString).toLocaleString(this.displayFormat)
+    },
     formatTime(i) {
       return i <= 10 ? '0' + (i - 1) : i - 1
     },

@@ -45,6 +45,8 @@
         v-if="showTimePicker"
         ref="timePicker"
         :height="$refs.popoverElement.clientHeight"
+        :locale="locale"
+        :display-format="displayFormat"
         @update:hour="setHour"
         @update:minute="setMinutes"
       ></time-picker>

@@ -1,5 +1,5 @@
 const undefinedGenerator = () => undefined
-import { Info, Settings } from 'luxon'
+import {DateTime, Info, Settings} from 'luxon'
 export const propsAndData = {
   props: {
     locale: {
@@ -41,8 +41,10 @@ export const propsAndData = {
       }
     },
     displayFormat: {
-      type: String,
-      default: 'lll'
+      type: Object,
+      default() {
+        return DateTime.DATETIME_MED
+      }
     },
     canClearRange: {
       type: Boolean,
@@ -222,7 +224,7 @@ export const propsAndData = {
         sundayStart: false,
         placeholder: false,
         dateFormat: 'YYYY-MM-DDTHH:mm:ss[Z]',
-        displayFormat: 'lll',
+        displayFormat: DateTime.DATETIME_MED,
         isMultipleDateRange: false,
         isDatePicker: false,
         isMultipleDatePicker: false,
