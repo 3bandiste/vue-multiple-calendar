@@ -130,7 +130,10 @@ export const propsAndData = {
       default: false
     },
     disabledDates: {
-      type: Array
+      type: Array,
+      default() {
+        return []
+      }
     },
     enabledDates: {
       type: Array
