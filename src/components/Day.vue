@@ -37,6 +37,10 @@ export default {
     tooltip: VTooltip
   },
   props: {
+    highlightToday: {
+      type: Boolean,
+      default: true
+    },
     day_key: {
       type: Number,
       required: true
@@ -301,7 +305,7 @@ export default {
       }
 
       // Today date
-      if (day.isToday) {
+      if (day.isToday && this.highlightToday) {
         classes.push('vfc-today')
       }
       if (day.markedDateData.class) {

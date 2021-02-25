@@ -168,6 +168,7 @@
                       :helpCalendar="helpCalendar"
                       :week="week"
                       :day_key="day_key"
+                      :highlight-today="highlightToday"
                       @dayMouseOver="dayMouseOver"
                       @mousedown="startSwipeSelection"
                       @mouseup="endSwipeSelection"

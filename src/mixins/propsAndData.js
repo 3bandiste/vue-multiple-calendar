@@ -2,6 +2,10 @@ const undefinedGenerator = () => undefined
 import {DateTime, Info, Settings} from 'luxon'
 export const propsAndData = {
   props: {
+    highlightToday: {
+      type: Boolean,
+      default: true
+    },
     locale: {
       default: 'en'
     },
