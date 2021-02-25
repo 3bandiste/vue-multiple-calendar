@@ -161,11 +161,12 @@
                     <Day
                       v-for="(day, day_key) in week.days"
                       ref="day"
-                      :key="key + day.dateProperlyFormatted"
+                      :key="key + day.date"
                       :day="day"
                       :fConfigs="fConfigs"
                       :calendar="calendar"
                       :helpCalendar="helpCalendar"
+                      :is-disabled="isDateDisabled(day.date)"
                       :week="week"
                       :day_key="day_key"
                       :highlight-today="highlightToday"
@@ -604,9 +605,8 @@ export default {
 
             finalizedDays.push({
               day: day.day,
-              date: this.helpCalendar.formatDate(date),
+              date: momentDay.toISODate(),
               moment: momentDay,
-              dateProperlyFormatted: momentDay.toISODate(),
               dayOfWeek: parseInt(momentDay.toFormat('c')),
               hide: day.hide,
               isMouseToLeft: false,
@@ -631,7 +631,7 @@ export default {
     },
     isDaySelected(day) {
       return Array.isArray(this.calendar.selectedDates) &&
-          this.calendar.selectedDates.includes(day.dateProperlyFormatted)
+          this.calendar.selectedDates.includes(day.date)
     },
     clickDay(day) {
       // If swipe selection is activated, then the clickDay method is not used
@@ -879,7 +879,7 @@ export default {
         this.$emit('input', this.calendar)
       }
       else if (this.fConfigs.isDatePicker) {
-        this.calendar.selectedDate = day.dateProperlyFormatted
+        this.calendar.selectedDate = day.date
         this.$emit('input', this.calendar)
 
         // Is Auto Closeable
@@ -892,12 +892,12 @@ export default {
           this.isDaySelected(day)
         ) {
           let dateIndex = this.calendar.selectedDates.findIndex(
-            date => date.date === day.dateProperlyFormatted
+            date => date.date === day.date
           )
           this.calendar.selectedDates.splice(dateIndex, 1)
         } else {
           let date = Object.assign({}, this.defaultDateFormat)
-          date.date = day.dateProperlyFormatted
+          date.date = day.date
 
           if (!this.calendar.hasOwnProperty('selectedDates')) {
             this.calendar.selectedDates = []
@@ -933,7 +933,7 @@ export default {
             day.isMarked = false
             day.date = day.date.split(' ')[0]
             // Temporary selected days
-            if (this.temporarySelectedDates.includes(day.dateProperlyFormatted)) day.isMarked = true
+            if (this.temporarySelectedDates.includes(day.date)) day.isMarked = true
             // Date Picker
             if (this.fConfigs.isDatePicker) {
               if (DateTime.fromISO(this.calendar.selectedDate).hasSame(day.moment, 'day')) day.isMarked = true
@@ -1007,11 +1007,11 @@ export default {
             // With Custom Classes
             if (typeof this.fConfigs.markedDates[0] === 'object') {
               day.isMarked = this.fConfigs.markedDates.find(markDate => {
-                return markDate.date === day.dateProperlyFormatted
+                return markDate.date === day.date
               }) !== undefined
             } else {
               // Without Classes
-              day.isMarked = this.fConfigs.markedDates.includes(day.dateProperlyFormatted)
+              day.isMarked = this.fConfigs.markedDates.includes(day.date)
             }
           })
         })
@@ -1377,7 +1377,7 @@ export default {
       this.mousedownSelectionStartDate = day
       day.isMarked = true
       this.mousedownSelectionAction = this.isDaySelected(day) ? 'UNSELECT' : 'SELECT'
-      this.temporarySelectedDates.push(day.dateProperlyFormatted)
+      this.temporarySelectedDates.push(day.date)
     },
     endSwipeSelection() {
       if (!this.clickAndSwipeSelection || !this.isMousedownSelectionActive || !this.temporarySelectedDates.length) return
@@ -1710,6 +1710,9 @@ export default {
         return
       }
       this.calendar.multipleDateRange = []
+    },
+    isDateDisabled(date) {
+      return this.disabledDates.includes(date)
     }
   }
 }

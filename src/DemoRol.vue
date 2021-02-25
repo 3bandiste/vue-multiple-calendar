@@ -17,6 +17,7 @@
         :disabled-days="disabledDays"
         :limits="{min: '2021-02-11', max: '2022-01-01'}"
         :marked-dates="markedDates"
+        :disabled-dates="disabledDates"
     ></functional-calendar>
   </div>
 </template>
@@ -74,7 +75,7 @@ export default {
         }
       ],
       markedDates2: [],
-      disabledDates: [],
+      disabledDates: ['2021-02-24'],
       enabledDates: ['27/10/2020', '28/10/2020'],
       calendarConfigs: {
         isMultipleDatePicker: true,

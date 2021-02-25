@@ -37,6 +37,10 @@ export default {
     tooltip: VTooltip
   },
   props: {
+    isDisabled: {
+      type: Boolean,
+      default: false
+    },
     highlightToday: {
       type: Boolean,
       default: true
@@ -273,7 +277,7 @@ export default {
       }
       // Disable days of week if set in configuration
       let dateDay = day.dayOfWeek
-      const isDayDisabled = this.fConfigs.disabledDays.includes(dateDay)
+      const isDayDisabled = this.fConfigs.disabledDays.includes(dateDay) || this.isDisabled
       if (isDayDisabled) {
         day.hide = true
         classes.push('vfc-cursor-not-allowed')
