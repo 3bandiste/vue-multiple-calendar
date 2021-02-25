@@ -6,7 +6,7 @@
   },
   "name": "vue-multiple-calendar",
   "description": "Calendar component based on Vue.js",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "license": "MIT",
   "repository": {
     "type": "git",
