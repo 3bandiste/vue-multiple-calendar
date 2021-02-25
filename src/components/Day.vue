@@ -4,7 +4,7 @@
     <div v-if="endActive" class="vfc-base-end"></div>
     <span
       v-if="!day.hideLeftAndRightDays"
-      :class="getClassNames(day)"
+      :class="getClassNames"
       @click.self="$parent.$parent.clickDay(day)"
       @mouseover="dayMouseOver"
       v-tooltip="{
@@ -78,6 +78,192 @@ export default {
   },
   mixins: [dates],
   computed: {
+    getClassNames() {
+      let classes = []
+      if (!this.hasSlot('default')) {
+        classes.push('vfc-span-day')
+      }
+      // Disable days of week if set in configuration
+      let dateDay = this.day.dayOfWeek
+      const isDayDisabled = this.fConfigs.disabledDays.includes(dateDay) || this.isDisabled
+      if (isDayDisabled) {
+        this.day.hide = true
+        classes.push('vfc-cursor-not-allowed')
+        classes.push('vfc-hide')
+      }
+      // Disabled dates
+      if (this.isDisabledDate(this.day.date)) {
+        classes.push('vfc-disabled')
+        classes.push('vfc-cursor-not-allowed')
+      }
+
+      if (this.fConfigs.limits) {
+        let disabled = false
+        if (this.fConfigs.limits.min) {
+          let limitMin = DateTime.fromISO(this.fConfigs.limits.min)
+          if (limitMin.isValid && this.day.moment.startOf('day') < limitMin.startOf( 'day')) disabled = true
+        }
+        if (this.fConfigs.limits.max) {
+          if (this.fConfigs.limits.max) {
+            let limitMax = DateTime.fromISO(this.fConfigs.limits.max)
+            if (limitMax.isValid && this.day.moment.startOf('day') > limitMax.startOf( 'day')) disabled = true
+          }
+        }
+
+        if (disabled) {
+          classes.push('vfc-disabled')
+          classes.push('vfc-cursor-not-allowed')
+        }
+      }
+
+      // Today date
+      if (this.day.isToday && this.highlightToday) {
+        classes.push('vfc-today')
+      }
+      if (this.day.markedDateData.class) {
+        classes.push(this.day.markedDateData.class)
+      }
+      if (
+          !this.day.hideLeftAndRightDays &&
+          !isDayDisabled
+      ) {
+        // Mark Date
+        if (this.day.isMarked) {
+          classes.push('vfc-marked')
+        } else if (this.day.isHovered) {
+          classes.push('vfc-hovered')
+        }
+        if (this.fConfigs.markedDates.includes(this.day.date)) {
+          classes.push('vfc-borderd')
+        }
+
+        if (Array.isArray(this.fConfigs.markedDateRange)) {
+          this.fConfigs.markedDateRange.forEach(range => {
+            if (
+                this.helpCalendar.getDateFromFormat(range.start) <=
+                this.helpCalendar.getDateFromFormat(this.day.date) &&
+                this.helpCalendar.getDateFromFormat(range.end) >=
+                this.helpCalendar.getDateFromFormat(this.day.date)
+            ) {
+              classes.push('vfc-marked')
+            }
+            if (this.day.date === range.start) {
+              classes.push('vfc-start-marked')
+            } else if (this.day.date === range.end) {
+              classes.push('vfc-end-marked')
+            }
+          })
+        } else if (
+            this.fConfigs.markedDateRange.start &&
+            this.fConfigs.markedDateRange.end
+        ) {
+          // Date Range Marked
+
+          if (
+              this.helpCalendar.getDateFromFormat(
+                  this.fConfigs.markedDateRange.start
+              ) <= this.helpCalendar.getDateFromFormat(this.day.date) &&
+              this.helpCalendar.getDateFromFormat(
+                  this.fConfigs.markedDateRange.end
+              ) >= this.helpCalendar.getDateFromFormat(this.day.date)
+          ) {
+            classes.push('vfc-marked')
+          }
+          if (this.day.date === this.fConfigs.markedDateRange.start) {
+            classes.push('vfc-start-marked')
+          } else if (this.day.date === this.fConfigs.markedDateRange.end) {
+            classes.push('vfc-end-marked')
+          }
+        } else {
+          // Only After Start Marked
+          if (this.fConfigs.markedDateRange.start) {
+            if (
+                this.helpCalendar.getDateFromFormat(
+                    this.fConfigs.markedDateRange.start
+                ) <= this.helpCalendar.getDateFromFormat(this.day.date)
+            )
+              classes.push('vfc-marked')
+          }
+
+          // Only Before End Marked
+          if (this.fConfigs.markedDateRange.end) {
+            if (
+                this.helpCalendar.getDateFromFormat(
+                    this.fConfigs.markedDateRange.end
+                ) >= this.helpCalendar.getDateFromFormat(this.day.date)
+            )
+              classes.push('vfc-marked')
+          }
+        }
+
+        classes.push('vfc-hover')
+      }
+      //Date Multiple Range
+      if (this.fConfigs.isMultipleDateRange) {
+        if (!''.inRange) this.inRangeInit()
+        if (
+            this.day.isMarked ||
+            ~this.calendar.multipleDateRange
+                .map(range => range.start.split(' ')[0])
+                .indexOf(this.day.date) ||
+            ~this.calendar.multipleDateRange
+                .map(range => range.end.split(' ')[0])
+                .indexOf(this.day.date) ||
+            this.day.date.inRange(this.calendar.multipleDateRange)
+        ) {
+          classes.push('vfc-marked')
+        }
+
+        if (this.fConfigs.markedDates.includes(this.day.date)) {
+          classes.push('vfc-borderd')
+        }
+
+        if (
+            ~this.calendar.multipleDateRange
+                .map(range => range.start.split(' ')[0])
+                .indexOf(this.day.date)
+        ) {
+          classes.push('vfc-start-marked')
+        }
+
+        if (
+            ~this.calendar.multipleDateRange
+                .map(range => range.end.split(' ')[0])
+                .indexOf(this.day.date)
+        ) {
+          classes.push('vfc-end-marked')
+        }
+      }
+      // Date Mark With Custom Classes
+      if (typeof this.fConfigs.markedDates === 'object') {
+        let checkMarked = this.fConfigs.markedDates.find(markDate => {
+          return this.day.moment.hasSame(DateTime.fromISO(markDate), 'day')
+        })
+
+        if (typeof checkMarked !== 'undefined') {
+          classes.push(checkMarked.class)
+        }
+      }
+      if (this.calendar.dateRange) {
+        if (this.day.date === this.calendar.dateRange.start.split(' ')[0]) {
+          classes.push('vfc-start-marked')
+        }
+
+        if (this.day.date === this.calendar.dateRange.end.split(' ')[0]) {
+          classes.push('vfc-end-marked')
+        }
+      }
+
+      if (
+          this.day.moment.hasSame(DateTime.fromISO(this.calendar.selectedDate), 'day') ||
+          (Array.isArray(this.calendar.selectedDates) &&
+              this.calendar.selectedDates.find(sDate => this.day.moment.hasSame(DateTime.fromISO(sDate), 'day'))
+          )) {
+        classes.push('vfc-borderd')
+      }
+
+      return classes
+    },
     startActive() {
       if (!this.fConfigs.isMultipleDateRange)
         return (
@@ -268,193 +454,6 @@ export default {
         !!this.$parent.$parent.$slots[name] ||
         !!this.$parent.$parent.$scopedSlots[name]
       )
-    },
-    getClassNames(day) {
-      let classes = []
-
-      if (!this.hasSlot('default')) {
-        classes.push('vfc-span-day')
-      }
-      // Disable days of week if set in configuration
-      let dateDay = day.dayOfWeek
-      const isDayDisabled = this.fConfigs.disabledDays.includes(dateDay) || this.isDisabled
-      if (isDayDisabled) {
-        day.hide = true
-        classes.push('vfc-cursor-not-allowed')
-        classes.push('vfc-hide')
-      }
-      // Disabled dates
-      if (this.isDisabledDate(day.date)) {
-        classes.push('vfc-disabled')
-        classes.push('vfc-cursor-not-allowed')
-      }
-
-      if (this.fConfigs.limits) {
-        let disabled = false
-        if (this.fConfigs.limits.min) {
-          let limitMin = DateTime.fromISO(this.fConfigs.limits.min)
-          if (limitMin.isValid && day.moment.startOf('day') < limitMin.startOf( 'day')) disabled = true
-        }
-        if (this.fConfigs.limits.max) {
-          if (this.fConfigs.limits.max) {
-            let limitMax = DateTime.fromISO(this.fConfigs.limits.max)
-            if (limitMax.isValid && day.moment.startOf('day') > limitMax.startOf( 'day')) disabled = true
-          }
-        }
-
-        if (disabled) {
-          classes.push('vfc-disabled')
-          classes.push('vfc-cursor-not-allowed')
-        }
-      }
-
-      // Today date
-      if (day.isToday && this.highlightToday) {
-        classes.push('vfc-today')
-      }
-      if (day.markedDateData.class) {
-        classes.push(day.markedDateData.class)
-      }
-      if (
-        !day.hideLeftAndRightDays &&
-        !isDayDisabled
-      ) {
-        // Mark Date
-        if (day.isMarked) {
-          classes.push('vfc-marked')
-        } else if (day.isHovered) {
-          classes.push('vfc-hovered')
-        }
-        if (this.fConfigs.markedDates.includes(day.date)) {
-          classes.push('vfc-borderd')
-        }
-
-        if (Array.isArray(this.fConfigs.markedDateRange)) {
-          this.fConfigs.markedDateRange.forEach(range => {
-            if (
-              this.helpCalendar.getDateFromFormat(range.start) <=
-                this.helpCalendar.getDateFromFormat(day.date) &&
-              this.helpCalendar.getDateFromFormat(range.end) >=
-                this.helpCalendar.getDateFromFormat(day.date)
-            ) {
-              classes.push('vfc-marked')
-            }
-            if (day.date === range.start) {
-              classes.push('vfc-start-marked')
-            } else if (day.date === range.end) {
-              classes.push('vfc-end-marked')
-            }
-          })
-        } else if (
-          this.fConfigs.markedDateRange.start &&
-          this.fConfigs.markedDateRange.end
-        ) {
-          // Date Range Marked
-
-          if (
-            this.helpCalendar.getDateFromFormat(
-              this.fConfigs.markedDateRange.start
-            ) <= this.helpCalendar.getDateFromFormat(day.date) &&
-            this.helpCalendar.getDateFromFormat(
-              this.fConfigs.markedDateRange.end
-            ) >= this.helpCalendar.getDateFromFormat(day.date)
-          ) {
-            classes.push('vfc-marked')
-          }
-          if (day.date === this.fConfigs.markedDateRange.start) {
-            classes.push('vfc-start-marked')
-          } else if (day.date === this.fConfigs.markedDateRange.end) {
-            classes.push('vfc-end-marked')
-          }
-        } else {
-          // Only After Start Marked
-          if (this.fConfigs.markedDateRange.start) {
-            if (
-              this.helpCalendar.getDateFromFormat(
-                this.fConfigs.markedDateRange.start
-              ) <= this.helpCalendar.getDateFromFormat(day.date)
-            )
-              classes.push('vfc-marked')
-          }
-
-          // Only Before End Marked
-          if (this.fConfigs.markedDateRange.end) {
-            if (
-              this.helpCalendar.getDateFromFormat(
-                this.fConfigs.markedDateRange.end
-              ) >= this.helpCalendar.getDateFromFormat(day.date)
-            )
-              classes.push('vfc-marked')
-          }
-        }
-
-        classes.push('vfc-hover')
-      }
-      //Date Multiple Range
-      if (this.fConfigs.isMultipleDateRange) {
-        if (!''.inRange) this.inRangeInit()
-        if (
-          day.isMarked ||
-          ~this.calendar.multipleDateRange
-            .map(range => range.start.split(' ')[0])
-            .indexOf(day.date) ||
-          ~this.calendar.multipleDateRange
-            .map(range => range.end.split(' ')[0])
-            .indexOf(day.date) ||
-          day.date.inRange(this.calendar.multipleDateRange)
-        ) {
-          classes.push('vfc-marked')
-        }
-
-        if (this.fConfigs.markedDates.includes(day.date)) {
-          classes.push('vfc-borderd')
-        }
-
-        if (
-          ~this.calendar.multipleDateRange
-            .map(range => range.start.split(' ')[0])
-            .indexOf(day.date)
-        ) {
-          classes.push('vfc-start-marked')
-        }
-
-        if (
-          ~this.calendar.multipleDateRange
-            .map(range => range.end.split(' ')[0])
-            .indexOf(day.date)
-        ) {
-          classes.push('vfc-end-marked')
-        }
-      }
-      // Date Mark With Custom Classes
-      if (typeof this.fConfigs.markedDates === 'object') {
-        let checkMarked = this.fConfigs.markedDates.find(markDate => {
-          return day.moment.hasSame(DateTime.fromISO(markDate), 'day')
-        })
-
-        if (typeof checkMarked !== 'undefined') {
-          classes.push(checkMarked.class)
-        }
-      }
-      if (this.calendar.dateRange) {
-        if (day.date === this.calendar.dateRange.start.split(' ')[0]) {
-          classes.push('vfc-start-marked')
-        }
-
-        if (day.date === this.calendar.dateRange.end.split(' ')[0]) {
-          classes.push('vfc-end-marked')
-        }
-      }
-
-      if (
-        day.moment.hasSame(DateTime.fromISO(this.calendar.selectedDate), 'day') ||
-        (Array.isArray(this.calendar.selectedDates) &&
-          this.calendar.selectedDates.find(sDate => day.moment.hasSame(DateTime.fromISO(sDate), 'day'))
-      )) {
-        classes.push('vfc-borderd')
-      }
-
-      return classes
     }
   }
 }

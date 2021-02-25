@@ -106,7 +106,7 @@ export const propsAndData = {
       default: () => 3
     },
     newCurrentDate: {
-      type: [Date, String]
+      type: String
     },
     markedDates: {
       type: Array,
