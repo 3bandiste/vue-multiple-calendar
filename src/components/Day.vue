@@ -245,11 +245,11 @@ export default {
         }
       }
       if (this.calendar.dateRange) {
-        if (this.day.date === this.calendar.dateRange.start.split(' ')[0]) {
+        if (this.calendar.dateRange.start && this.day.moment.hasSame(DateTime.fromISO(this.calendar.dateRange.start), 'day')) {
           classes.push('vfc-start-marked')
         }
 
-        if (this.day.date === this.calendar.dateRange.end.split(' ')[0]) {
+        if (this.calendar.dateRange.end && this.day.moment.hasSame(DateTime.fromISO(this.calendar.dateRange.end), 'day')) {
           classes.push('vfc-end-marked')
         }
       }

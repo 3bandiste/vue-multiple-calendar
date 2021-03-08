@@ -3,6 +3,7 @@
     <PickerInputs
       :fConfigs="fConfigs"
       :singleSelectedDate="singleSelectedDate"
+      :display-format="cDisplayFormat"
       :calendar="calendar"
     >
       <template v-slot:dateRangeInputs="props">
@@ -46,7 +47,7 @@
         ref="timePicker"
         :height="$refs.popoverElement.clientHeight"
         :locale="locale"
-        :display-format="displayFormat"
+        :display-format="cDisplayFormat"
         @update:hour="setHour"
         @update:minute="setMinutes"
       ></time-picker>
@@ -254,6 +255,10 @@ export default {
   },
   mixins: [propsAndData, dates],
   computed: {
+    cDisplayFormat() {
+      if (this.displayFormat) return this.displayFormat
+      return this.withTimePicker ? DateTime.DATETIME_MED : DateTime.DATE_MED
+    },
     dateRangeStartMoment() {
       if (!this.calendar.dateRange) return null
       if (this.calendar.dateRange.start) {
@@ -333,14 +338,6 @@ export default {
     this.initCalendar()
   },
   mounted() {
-    //show time placeholder
-    if (this.displayTimeInput) {
-      const timeFormat = this.fConfigs.placeholder.split(' ')[1]
-      if (!timeFormat) {
-        this.fConfigs.placeholder += ' hh:mm'
-      }
-    }
-
     this.popoverElement = this.$refs.popoverElement
     // Event
     this.popoverElement.addEventListener('focusin', this.onFocusIn)
@@ -636,9 +633,6 @@ export default {
     clickDay(day) {
       // If swipe selection is activated, then the clickDay method is not used
       if (this.clickAndSwipeSelection) return
-      if (this.fConfigs.withTimePicker && this.fConfigs.isDateRange) {
-        day.date = day.date + ' 00:00'
-      }
       this.$emit('dayClicked', day)
 
       if (
@@ -755,40 +749,35 @@ export default {
         this.$emit('input', this.calendar)
       } // Date Range
       else if (this.fConfigs.isDateRange) {
-        let clickDate = this.helpCalendar
-          .getDateFromFormat(day.date.split(' ')[0])
-          .getTime()
-
-        let startDate = ''
+        let clickDate = day.moment
+        let startDate = null
         if (this.calendar.dateRange.start) {
-          startDate = this.helpCalendar.getDateFromFormat(
-            this.calendar.dateRange.start
-          )
+          startDate = DateTime.fromISO(this.calendar.dateRange.start)
         }
 
         // Two dates is not empty
         if (
-          this.calendar.dateRange.start !== '' &&
-          this.calendar.dateRange.end !== ''
+          this.calendar.dateRange.start &&
+          this.calendar.dateRange.end
         ) {
-          this.calendar.dateRange.start = day.date
-          this.calendar.dateRange.end = ''
+          this.calendar.dateRange.start = day.moment.toISO()
+          this.calendar.dateRange.end = null
           // Not date selected
         } else if (
-          this.calendar.dateRange.start === '' &&
-          this.calendar.dateRange.end === ''
+          this.calendar.dateRange.start === null &&
+          this.calendar.dateRange.end === null
         ) {
-          this.calendar.dateRange.start = day.date
+          this.calendar.dateRange.start = day.moment.toISO()
           // Start Date not empty, chose date > start date
         } else if (
-          this.calendar.dateRange.end === '' &&
-          clickDate > startDate.getTime()
+          this.calendar.dateRange.end === null &&
+            day.moment > startDate
         ) {
-          this.calendar.dateRange.end = day.date
+          this.calendar.dateRange.end = day.moment.toISO()
           // Start date not empty, chose date <= start date (also same date range select)
         } else if (
-          this.calendar.dateRange.start !== '' &&
-          clickDate <= startDate.getTime()
+          this.calendar.dateRange.start !== null &&
+          day.moment <= startDate
         ) {
           this.$nextTick(() => {
             if (this.calendar.dateRange && this.calendar.withTimePicker) {
@@ -796,14 +785,11 @@ export default {
             }
           })
           this.calendar.dateRange.end = this.calendar.dateRange.start
-          this.calendar.dateRange.start = day.date
+          this.calendar.dateRange.start = day.moment.toISO()
         }
 
         //Get number of days between date range dates
-        if (
-          this.calendar.dateRange.start !== '' &&
-          this.calendar.dateRange.end !== ''
-        ) {
+        if (this.calendar.dateRange.start && this.calendar.dateRange.end) {
           let oneDay = 24 * 60 * 60 * 1000
           let firstDate = this.helpCalendar.getDateFromFormat(
             this.calendar.dateRange.start
@@ -931,7 +917,6 @@ export default {
         calendar.weeks.forEach(week => {
           week.days.forEach(day => {
             day.isMarked = false
-            day.date = day.date.split(' ')[0]
             // Temporary selected days
             if (this.temporarySelectedDates.includes(day.date)) day.isMarked = true
             // Date Picker
@@ -992,7 +977,7 @@ export default {
                 })
               }
 
-              if (this.dateRangeStartMoment && this.dateRangeStartMoment.hasSame(this.dateRangeEndMoment, 'day')) {
+              if (this.dateRangeStartMoment && this.dateRangeEndMoment && this.dateRangeStartMoment.hasSame(this.dateRangeEndMoment, 'day')) {
                 day.isMouseToLeft = false
                 day.isMouseToRight = false
               }

@@ -14,16 +14,16 @@
         <input
           type="text"
           title="Start Date"
-          v-model="dateRangeSelectedStartDate"
-          :placeholder="fConfigs.placeholder.split(' ')[0]"
+          :value="dateRangeSelectedStartDate"
+          placeholder="Start Date"
           :readonly="!fConfigs.isTypeable"
           :maxlength="fConfigs.dateFormat.length"
         />
         <input
           type="text"
           title="End Date"
-          v-model="dateRangeSelectedEndDate"
-          :placeholder="fConfigs.placeholder.split(' ')[0]"
+          :value="dateRangeSelectedEndDate"
+          placeholder="End date"
           :readonly="!fConfigs.isTypeable"
           :maxlength="fConfigs.dateFormat.length"
         />
@@ -82,6 +82,8 @@
 </template>
 
 <script>
+import {DateTime} from "luxon";
+
 export default {
   name: 'PickerInputs',
   props: {
@@ -96,30 +98,38 @@ export default {
     calendar: {
       type: Object,
       required: true
+    },
+    displayFormat: {
+      type: Object,
+      default() {
+        return DateTime.DATETIME_MED
+      }
     }
   },
   computed: {
     dateRangeSelectedStartDate: {
       get() {
         return this.calendar.dateRange.start
-          ? this.calendar.dateRange.start
-          : ''
+          ? DateTime.fromISO(this.calendar.dateRange.start).toLocaleString(this.displayFormat)
+          : null
       },
       set(newValue) {
-        newValue = this.helpCalendar.mask(newValue)
-        if (this.helpCalendar.getDateFromFormat(newValue).getMonth()) {
-          this.calendar.dateRange.start = newValue
+        newValue = DateTime.fromISO(newValue)
+        if (newValue.isValid) {
+          this.calendar.dateRange.start = newValue.toISO()
         }
       }
     },
     dateRangeSelectedEndDate: {
       get() {
-        return this.calendar.dateRange.end ? this.calendar.dateRange.end : ''
+        return this.calendar.dateRange.end
+            ? DateTime.fromISO(this.calendar.dateRange.end).toLocaleString(this.displayFormat)
+            : null
       },
       set(newValue) {
-        newValue = this.helpCalendar.mask(newValue)
-        if (this.helpCalendar.getDateFromFormat(newValue).getMonth()) {
-          this.calendar.dateRange.end = newValue
+        newValue = DateTime.fromISO(newValue)
+        if (newValue.isValid) {
+          this.calendar.dateRange.end = newValue.toISO()
         }
       }
     }

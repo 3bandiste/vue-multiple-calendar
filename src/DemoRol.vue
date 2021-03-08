@@ -1,24 +1,98 @@
 <template>
-  <div style="background: white">
-    <functional-calendar
-        :is-separately="true"
-        :change-month-function="true"
-        :change-year-function="true"
-        :changeYearStep="1"
-        :is-multiple="false"
-        :is-date-picker="false"
-        :is-multiple-date-picker="true"
-        with-time-picker
-        :calendars-count="2"
-        :is-modal="false"
-        v-model="calendarData"
-        :click-and-swipe-selection="true"
-        date-format="YYYY-MM-DDTHH:mm:ss[Z]"
-        :disabled-days="disabledDays"
-        :limits="{min: '2021-02-11', max: '2022-01-01'}"
-        :marked-dates="markedDates"
-        :disabled-dates="disabledDates"
-    ></functional-calendar>
+  <div>
+    <div style="background: grey; padding: 25px;">
+      <h1>Date & time Picker</h1>
+      <div style="display: flex; justify-content: space-around">
+        <functional-calendar
+            :is-separately="true"
+            :change-month-function="true"
+            :change-year-function="true"
+            :changeYearStep="1"
+            :is-multiple="true"
+            :is-date-picker="true"
+            :is-multiple-date-picker="false"
+            :is-date-range="false"
+            :with-time-picker="true"
+            :calendars-count="2"
+            :is-modal="true"
+            v-model="calendar2Data"
+            :click-and-swipe-selection="false"
+            date-format="YYYY-MM-DDTHH:mm:ss[Z]"
+            :limits="{min: '2021-02-11', max: '2022-01-01'}"
+            :marked-dates="markedDates"
+            :disabled-dates="disabledDates"
+        ></functional-calendar>
+      </div>
+
+    </div>
+    <div style="background: white; padding: 25px">
+      <h1>Date picker multiple</h1>
+      <functional-calendar
+          :is-separately="true"
+          :change-month-function="true"
+          :change-year-function="true"
+          :changeYearStep="1"
+          :is-multiple="false"
+          :is-date-picker="false"
+          :is-multiple-date-picker="true"
+          with-time-picker
+          :calendars-count="2"
+          :is-modal="false"
+          v-model="calendarData"
+          :click-and-swipe-selection="true"
+          date-format="YYYY-MM-DDTHH:mm:ss[Z]"
+          :disabled-days="disabledDays"
+          :limits="{min: '2021-02-11', max: '2022-01-01'}"
+          :marked-dates="markedDates"
+          :disabled-dates="disabledDates"
+      ></functional-calendar>
+    </div>
+    <div style="background: grey; padding: 25px;">
+      <h1>Range Pickers</h1>
+      <div style="display: flex; justify-content: space-around">
+        <functional-calendar
+            :is-separately="true"
+            :change-month-function="true"
+            :change-year-function="true"
+            :changeYearStep="1"
+            :is-multiple="true"
+            :is-date-picker="false"
+            :is-multiple-date-picker="false"
+            :is-date-range="true"
+            :with-time-picker="false"
+            :calendars-count="2"
+            :is-modal="true"
+            :is-typeable="false"
+            v-model="calendar2Data"
+            :click-and-swipe-selection="false"
+            date-format="YYYY-MM-DDTHH:mm:ss[Z]"
+            :limits="{min: '2021-02-11', max: '2022-01-01'}"
+            :marked-dates="markedDates"
+            :disabled-dates="disabledDates"
+        ></functional-calendar>
+        <functional-calendar
+            locale="ru"
+            :is-separately="true"
+            :change-month-function="true"
+            :change-year-function="true"
+            :changeYearStep="1"
+            :is-multiple="true"
+            :is-date-picker="false"
+            :is-multiple-date-picker="false"
+            :is-date-range="true"
+            :with-time-picker="false"
+            :calendars-count="2"
+            :is-modal="false"
+            v-model="calendar2Data"
+            :click-and-swipe-selection="false"
+            date-format="YYYY-MM-DDTHH:mm:ss[Z]"
+            :limits="{min: '2021-02-11', max: '2022-01-01'}"
+            :marked-dates="markedDates"
+            :disabled-dates="disabledDates"
+        ></functional-calendar>
+      </div>
+
+    </div>
   </div>
 </template>
 
@@ -67,6 +141,7 @@ export default {
         }
       ],
       calendarData: {},
+      calendar2Data: {},
       markedDates: [
         {
           date: '2021-02-12',

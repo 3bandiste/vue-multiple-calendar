@@ -33,22 +33,8 @@ export const propsAndData = {
       type: [String, Boolean],
       default: undefinedGenerator
     },
-    dateFormat: {
-      type: String,
-      validator(format) {
-        let timeFormat = format.split(' ')[1]
-        if (!timeFormat) {
-          return true
-        }
-        const validFormats = ['HH:MM', 'HH:mm', 'hh:MM', 'hh:mm']
-        return !!~validFormats.indexOf(timeFormat)
-      }
-    },
     displayFormat: {
       type: Object,
-      default() {
-        return DateTime.DATETIME_MED
-      }
     },
     canClearRange: {
       type: Boolean,
@@ -214,8 +200,8 @@ export const propsAndData = {
         selectedDatesItem: '',
         selectedDates: [],
         dateRange: {
-          start: '',
-          end: ''
+          start: null,
+          end: null
         },
         multipleDateRange: []
       },
