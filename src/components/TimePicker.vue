@@ -124,7 +124,7 @@ export default {
   },
   methods: {
     displayFormattedDateTime(datetimeIsoString) {
-      return DateTime.fromISO(datetimeIsoString).toLocaleString(this.displayFormat)
+      return DateTime.fromISO(datetimeIsoString,{zone:this.$parent.timezone}).toLocaleString(DateTime.DATETIME_FULL)
     },
     formatTime(i) {
       return i <= 10 ? '0' + (i - 1) : i - 1
