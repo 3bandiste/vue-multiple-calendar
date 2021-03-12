@@ -6,6 +6,10 @@ export const propsAndData = {
       type: Boolean,
       default: true
     },
+    timezone:{
+      type: String,
+      default: null
+    },
     locale: {
       default: 'en'
     },

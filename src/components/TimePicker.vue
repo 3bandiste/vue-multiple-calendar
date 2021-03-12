@@ -91,7 +91,11 @@ export default {
     height: {
       type: Number,
       required: true
-    }
+    },
+    timezone:{
+      type: String,
+      default: null
+    },
   },
   watch: {
     startDateActive() {
@@ -112,19 +116,20 @@ export default {
   },
   mounted() {
     Settings.defaultLocale = this.locale
-    if (this.$parent.calendar.dateRange) {
+    // Todo update this block to make it work with datetime objects
+    /*if (this.$parent.calendar.dateRange) {
       let startDate = this.$parent.calendar.dateRange.start.split(' ')[0]
       let endDate = this.$parent.calendar.dateRange.end.split(' ')[0]
       this.startDateActive = !(startDate &&
           this.$parent.helpCalendar.getDateFromFormat(startDate) <
           this.$parent.helpCalendar.getDateFromFormat(endDate));
-    }
+    }*/
     this.setSelectedDateTime()
     this.setStyles()
   },
   methods: {
     displayFormattedDateTime(datetimeIsoString) {
-      return DateTime.fromISO(datetimeIsoString).toLocaleString(this.displayFormat)
+      return DateTime.fromISO(datetimeIsoString,{zone: this.timezone}).toLocaleString(this.displayFormat)
     },
     formatTime(i) {
       return i <= 10 ? '0' + (i - 1) : i - 1
