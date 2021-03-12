@@ -397,9 +397,11 @@ export default {
       deep: true
     },
     timezone(){
+      if (this.isDatePicker && this.calendar.selectedDate) {
         const selectedDate = DateTime.fromISO(this.calendar.selectedDate,{zone:this.timezone})
         this.calendar.selectedDate = selectedDate.toISO()
         this.$emit('input', this.calendar)
+      }
     },
     // disable weekends
     disableWeekends (disable) {
