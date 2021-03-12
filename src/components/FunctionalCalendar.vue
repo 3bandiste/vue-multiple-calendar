@@ -27,7 +27,7 @@
         <slot name="datePickerMultipleInput"></slot>
       </template>
     </PickerInputs>
-    
+
     <div
       class="vfc-main-container"
       @mouseleave="endSwipeSelection"
@@ -47,6 +47,7 @@
         ref="timePicker"
         :height="$refs.popoverElement.clientHeight"
         :locale="locale"
+        :timezone="timezone"
         :display-format="cDisplayFormat"
         @update:hour="setHour"
         @update:minute="setMinutes"

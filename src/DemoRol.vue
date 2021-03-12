@@ -1,7 +1,7 @@
 <template>
   <div>
     <div style="background: grey; padding: 25px;">
-      <h1>Date & time Picker</h1>
+      <h1>Date & time Picker with America/Anchorage TZ</h1>
       <div style="display: flex; justify-content: space-around">
         <functional-calendar
             :is-separately="true"
@@ -15,12 +15,14 @@
             :with-time-picker="true"
             :calendars-count="2"
             :is-modal="true"
-            v-model="calendar2Data"
+            v-model="calendarWithTimePicker"
             :click-and-swipe-selection="false"
             date-format="YYYY-MM-DDTHH:mm:ss[Z]"
             :limits="{min: '2021-02-11', max: '2022-01-01'}"
             :marked-dates="markedDates"
             :disabled-dates="disabledDates"
+            timezone="America/Anchorage"
+            :display-format="DateTime.DATETIME_FULL"
         ></functional-calendar>
       </div>
 
@@ -98,6 +100,7 @@
 
 <script>
 import { FunctionalCalendar } from '../index'
+import { DateTime } from 'luxon'
 /* eslint-disable */
 export default {
   components: { FunctionalCalendar },
@@ -142,6 +145,7 @@ export default {
       ],
       calendarData: {},
       calendar2Data: {},
+      calendarWithTimePicker: {},
       markedDates: [
         {
           date: '2021-02-12',
@@ -156,6 +160,11 @@ export default {
         isMultipleDatePicker: true,
         dayNames: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su']
       }
+    }
+  },
+  computed: {
+    DateTime() {
+      return DateTime
     }
   },
   methods: {
