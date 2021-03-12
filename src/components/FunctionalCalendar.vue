@@ -47,6 +47,7 @@
         ref="timePicker"
         :height="$refs.popoverElement.clientHeight"
         :locale="locale"
+        :timezone="timezone"
         :display-format="cDisplayFormat"
         @update:hour="setHour"
         @update:minute="setMinutes"
@@ -320,7 +321,6 @@ export default {
               )
           }
         }
-
         return this.calendar.selectedDate
           ? this.calendar.selectedDate + res
           : ''
@@ -397,6 +397,13 @@ export default {
       },
       deep: true
     },
+    timezone(){
+      if (this.isDatePicker && this.calendar.selectedDate) {
+        const selectedDate = DateTime.fromISO(this.calendar.selectedDate,{zone:this.timezone})
+        this.calendar.selectedDate = selectedDate.toISO()
+        this.$emit('input', this.calendar)
+      }
+    },
     // disable weekends
     disableWeekends (disable) {
       if (disable) {
@@ -435,14 +442,14 @@ export default {
   methods: {
     setHour(hour) {
       if (this.isDatePicker && this.calendar.selectedDate) {
-        const selectedDate = DateTime.fromISO(this.calendar.selectedDate).set({hour: hour})
+        const selectedDate = DateTime.fromISO(this.calendar.selectedDate,{zone:this.timezone}).set({hour: hour})
         this.calendar.selectedDate = selectedDate.toISO()
         this.$emit('input', this.calendar)
       }
     },
     setMinutes(minute) {
       if (this.isDatePicker && this.calendar.selectedDate) {
-        const selectedDate = DateTime.fromISO(this.calendar.selectedDate).set({minute: minute})
+        const selectedDate = DateTime.fromISO(this.calendar.selectedDate,{zone:this.timezone}).set({minute: minute})
         this.calendar.selectedDate = selectedDate.toISO()
         this.$emit('input', this.calendar)
       }
@@ -745,7 +752,6 @@ export default {
             lastRange.start = this.helpCalendar.formatDate(startDate)
           }
         }
-
         this.$emit('input', this.calendar)
       } // Date Range
       else if (this.fConfigs.isDateRange) {
@@ -861,7 +867,6 @@ export default {
             )
           }
         }
-
         this.$emit('input', this.calendar)
       }
       else if (this.fConfigs.isDatePicker) {
@@ -1489,7 +1494,6 @@ export default {
     },
     ChooseDate(date) {
       let newDate = this.helpCalendar.getDateFromFormat(date)
-
       if (date === 'today') {
         newDate = new Date()
       }
