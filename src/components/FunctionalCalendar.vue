@@ -1363,6 +1363,7 @@ export default {
     startSwipeSelection(day) {
       if (!this.clickAndSwipeSelection) return
       if (this.isDayDisabled(day)) return
+      if (this.isDateDisabled(day.date)) return
       this.isMousedownSelectionActive = true
       this.mousedownSelectionStartDate = day
       day.isMarked = true
@@ -1377,7 +1378,7 @@ export default {
         this.calendar.selectedDates = []
       }
       if (this.mousedownSelectionAction === 'SELECT') {
-        this.temporarySelectedDates.forEach(date => {
+        this.temporarySelectedDates.filter(date => !this.disabledDates.includes(date)).forEach(date => {
           if (!this.calendar.selectedDates.includes(date)) {
             this.calendar.selectedDates.push(date)
           }
