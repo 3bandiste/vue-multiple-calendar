@@ -433,9 +433,8 @@ export default {
       immediate: true
     },
     'calendar.currentDate': {
-      handler(value) {
+      handler() {
         this.$emit('input', this.calendar)
-        this.checkLimits(value)
       }
     }
   },
@@ -458,7 +457,6 @@ export default {
       this.setCalendarData()
       this.listRendering()
       this.markChooseDays()
-      this.checkLimits(this.calendar.currentDate)
     },
     updateCalendar() {
       this.setExistingCalendarData()
@@ -1632,9 +1630,6 @@ export default {
       }
 
       return result
-    },
-    checkLimits() {
-      return true;
     },
     getTransition_() {
       if (!this.fConfigs.transition) return ''
