@@ -18,7 +18,7 @@
             v-model="calendarWithTimePicker"
             :click-and-swipe-selection="false"
             date-format="YYYY-MM-DDTHH:mm:ss[Z]"
-            :limits="{min: '2021-02-11', max: '2022-01-01'}"
+            :limits="{min: '2021-02-11', max: '2023-01-01'}"
             :marked-dates="markedDates"
             :disabled-dates="disabledDates"
             timezone="America/Anchorage"
@@ -44,7 +44,7 @@
           :click-and-swipe-selection="true"
           date-format="YYYY-MM-DDTHH:mm:ss[Z]"
           :disabled-days="disabledDays"
-          :limits="{min: '2021-02-11', max: '2022-01-01'}"
+          :limits="{min: '2021-02-11', max: '2023-01-01'}"
           :marked-dates="markedDates"
           :disabled-dates="disabledDates"
       ></functional-calendar>
@@ -68,7 +68,7 @@
             v-model="calendar2Data"
             :click-and-swipe-selection="false"
             date-format="YYYY-MM-DDTHH:mm:ss[Z]"
-            :limits="{min: '2021-02-11', max: '2022-01-01'}"
+            :limits="{min: '2021-02-11', max: '2023-01-01'}"
             :marked-dates="markedDates"
             :disabled-dates="disabledDates"
         ></functional-calendar>
@@ -88,7 +88,7 @@
             v-model="calendar2Data"
             :click-and-swipe-selection="false"
             date-format="YYYY-MM-DDTHH:mm:ss[Z]"
-            :limits="{min: '2021-02-11', max: '2022-01-01'}"
+            :limits="{min: '2021-02-11', max: '2023-01-01'}"
             :marked-dates="markedDates"
             :disabled-dates="disabledDates"
         ></functional-calendar>
