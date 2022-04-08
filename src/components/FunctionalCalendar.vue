@@ -20,6 +20,7 @@
           :selectedDate="props.selectedDate"
           :isTypeable="fConfigs.isTypeable"
           name="datePickerInput"
+          :on="{'input': onInputChange}"
         >
         </slot>
       </template>
@@ -439,6 +440,9 @@ export default {
     }
   },
   methods: {
+    onInputChange() {
+      this.initCalendar()
+    },
     setHour(hour) {
       if (this.isDatePicker && this.calendar.selectedDate) {
         const selectedDate = DateTime.fromISO(this.calendar.selectedDate,{zone:this.timezone}).set({hour: hour})
@@ -467,7 +471,10 @@ export default {
       return this.isSeparately || key === 0
     },
     setCalendarData() {
-      let date = this.calendar.currentDate
+      let date = this.calendar.currentDate || this.calendar.selectedDate || new Date()
+      if (typeof date === 'string') {
+        date = new Date(date)
+      }
       date = new Date(date.getFullYear(), date.getMonth() - 1)
 
       this.listCalendars = []
