@@ -895,7 +895,7 @@ export default {
           let date = Object.assign({}, this.defaultDateFormat)
           date.date = day.date
 
-          if (!this.calendar.hasOwnProperty('selectedDates')) {
+          if (!Array.isArray(this.calendar.selectedDates)) {
             this.calendar.selectedDates = []
           }
 
